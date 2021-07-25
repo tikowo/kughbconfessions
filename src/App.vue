@@ -1,5 +1,5 @@
 <template>
-  <div v-if="width < 620" class="bg-gray-100 min-h-screen">
+  <div class="max-w-lg m-auto bg-gray-100 min-h-screen">
     <header class="relative mb-3 justify-center">
       <figure class="relative" style="padding-bottom: 84%">
         <img :key="mascot" class="w-full h-full absolute" alt="Need jesus" :src="getSrc(mascot)" />
@@ -29,9 +29,7 @@
       </footer>
     </div>
   </div>
-  <div v-else>
-    Only works on a phone :(
-  </div>
+
 </template>
 
 <script>
