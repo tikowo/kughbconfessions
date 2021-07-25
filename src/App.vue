@@ -4,11 +4,11 @@
       <figure class="relative" style="padding-bottom: 84%">
         <img :key="mascot" class="w-full h-full absolute" alt="Need jesus" :src="getSrc(mascot)" />
       </figure>
-      <a class="absolute right-0 bottom-0 px-3 text-blue-600" @click="changeMascot">Change</a>
+      <a class="cursor-pointer absolute right-0 bottom-0 px-3 text-blue-600" @click="changeMascot">Change</a>
     </header>
     <div class="px-2">
       <div class="mb-5">
-        <a @click="openConfessionForm" class="text-2xl text-blue-600">Add a confession</a>
+        <a @click="openConfessionForm" class="cursor-pointer text-2xl text-blue-600">Add a confession</a>
         <form @submit.prevent="confess" v-if="confessionForm">
           <textarea maxlength="1024" v-model="confessionText" class="w-full mt-3 mb-1 h-24"></textarea>
           <button class="px-3 py-2 mr-2 bg-yellow-900 text-white" type="submit">Confess</button>
@@ -17,7 +17,7 @@
       </div>
 
       <p class="text-xl mb-3 text-gray-900">Recent</p>
-      <Message :data="confession" v-for="confession in confessions" :key="confession.id"/>
+      <Message class="pb-4" @reply="handleReply" :data="confession" v-for="confession in confessions" :key="confession.id"/>
       <button v-if="confessions.length" @click="nextPage" class="px-3 py-2 w-full bg-yellow-900 text-white">load more</button>
 
       <footer class="py-3 border-t-2">
@@ -47,7 +47,7 @@ export default {
     const confessionForm = ref(false);
     const confessionText = ref("");
     const confessions = ref([]);
-  
+
     let currentPage = 0;
 
     const changeMascot = () => {
@@ -90,6 +90,19 @@ export default {
       confessionText.value = "";
     };
 
+    const handleReply = async (e) => {
+      const response = await fetch(`${VITE_APP_API_URL}/confessions/${e.data.id}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({reply: e.reply})
+      });
+      const data = await response.json();
+      data.created_at = new Date();
+      e.data.replies.push(data);
+    } 
+
     onMounted(() => {
       fetchConfessions();
     });
@@ -100,10 +113,12 @@ export default {
     };
 
     const fetchConfessions = async () => {
-      const response = await fetch(`${VITE_APP_API_URL}/confessions?page=${currentPage}`);
+      const response = await fetch(
+        `${VITE_APP_API_URL}/confessions?page=${currentPage}`
+      );
       const data = await response.json();
       confessions.value = [...confessions.value, ...data];
-    }
+    };
 
     return {
       width,
@@ -115,7 +130,8 @@ export default {
       changeMascot,
       confess,
       openConfessionForm,
-      nextPage
+      nextPage,
+      handleReply
     };
   },
 };
